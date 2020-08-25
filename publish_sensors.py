@@ -10,6 +10,7 @@ import numpy as np
 import datetime
 from bmx280_simple import *
 import Adafruit_ADS1x15
+import Adafruit_BME280
 import boto3
 import csv
 
@@ -55,7 +56,7 @@ class bmp(object):
         logging.basicConfig(filename='bmp.log',level=logging.DEBUG)
         logging.info("Initializing temperature and pressure sensor bmp 280")
 
-        bmx280Begin()
+        self.sensor = Adafruit_BME280.BME280(t_mode=Adafruit_BME280.BME280_OSAMPLE_8, p_mode=Adafruit_BME280.BME280_OSAMPLE_8, h_mode=Adafruit_BME280.BME280_OSAMPLE_8)
 
         #data = self.get_data()
 
@@ -68,24 +69,19 @@ class bmp(object):
         dt_string = now.strftime("%Y%m%d_%H_%M_%S")
         return dt_string
 
-    def read_data(self):
-        bmx280ReadData()
-
     def read_temperature(self):
-        temperature = bmx280GetTemperature()
+        temperature = self.sensor.read_temperature()
         print(temperature)
         return temperature
 
     def read_pressure(self):
-        pressure = bmx280GetPressure()
+        pressure = self.sensor.read_pressure()
         print(pressure)
         return pressure
 
     def read_humidity(self):
-        sensorType = bmx280GetSensorType()
-        if(sensorType == DevID_BME280):
-            humidity = bmx280GetHumidity()
-            print(humidity)
+        humidity = self.sensor.read_humidity()
+        print(humidity)
         return humidity
 
     def write_to_dynamoDB(self,timestamp,temperature,pressure,humidity,dynamodb=None):
@@ -141,24 +137,22 @@ class bmp(object):
 
 
     def test(self):
+        sensor = Adafruit_BME280.BME280(t_mode=Adafruit_BME280.BME280_OSAMPLE_8, p_mode=Adafruit_BME280.BME280_OSAMPLE_8, h_mode=Adafruit_BME280.BME280_OSAMPLE_8)
         while(1):
-            bmx280ReadData()
-            temperature = bmx280GetTemperature()
-            pressure = bmx280GetPressure()
             print("Timestamp: {0}".format(self.get_time_string()))
-            print("Temperature: %.2f C" %temperature)
-            print("Pressure: %.2f Pascals" %pressure)
+            degrees = sensor.read_temperature()
+            pascals = sensor.read_pressure()
+            hectopascals = pascals / 100
+            humidity = sensor.read_humidity()
 
-            sensorType = bmx280GetSensorType()
-            if(sensorType == DevID_BME280):
-            #if(1):
-                    humidity = bmx280GetHumidity()
-                    print("Relative Humidity : %.2f %%" %humidity)
+            print('Temp      = {0:0.3f} deg C'.format(degrees))
+            print('Pressure  = {0:0.2f} hPa'.format(hectopascals))
+            print('Humidity  = {0:0.2f} %'.format(humidity))
+
             sleep(10)
 
     def loop(self):
         while(1):
-            self.read_data()
             #resp = self.write_to_dynamoDB(self.get_time_string(),str(self.read_temperature()),str(self.read_pressure()),str(self.read_humidity()))
             #print(resp)
             user_id = "000000001_Manuel_Belke"
@@ -192,7 +186,7 @@ class sensordata(object):
         logging.basicConfig(filename='bmp.log',level=logging.DEBUG)
         logging.info("Initializing sensors")
 
-        bmx280Begin()
+        self.sensor = Adafruit_BME280.BME280(t_mode=Adafruit_BME280.BME280_OSAMPLE_8, p_mode=Adafruit_BME280.BME280_OSAMPLE_8, h_mode=Adafruit_BME280.BME280_OSAMPLE_8)
 
         self.adc = Adafruit_ADS1x15.ADS1115()
         self.GAIN = 1
@@ -206,24 +200,19 @@ class sensordata(object):
         dt_string = now.strftime("%Y%m%d_%H_%M_%S")
         return dt_string
 
-    def read_data(self):
-        bmx280ReadData()
-
     def read_temperature(self):
-        temperature = bmx280GetTemperature()
+        temperature = self.sensor.read_temperature()
         print(temperature)
         return temperature
 
     def read_pressure(self):
-        pressure = bmx280GetPressure()
+        pressure = self.sensor.read_pressure()
         print(pressure)
         return pressure
 
     def read_humidity(self):
-        sensorType = bmx280GetSensorType()
-        if(sensorType == DevID_BME280):
-            humidity = bmx280GetHumidity()
-            print(humidity)
+        humidity = self.sensor.read_humidity()
+        print(humidity)
         return humidity
 
     def read_moisture(self,id):
@@ -286,26 +275,8 @@ class sensordata(object):
             for item in items:
                 csvwriter.writerow([item['data_number'], item['temperature'], item['pressure'],item['humidity']])
 
-
-    def test(self):
-        while(1):
-            bmx280ReadData()
-            temperature = bmx280GetTemperature()
-            pressure = bmx280GetPressure()
-            print("Timestamp: {0}".format(self.get_time_string()))
-            print("Temperature: %.2f C" %temperature)
-            print("Pressure: %.2f Pascals" %pressure)
-
-            sensorType = bmx280GetSensorType()
-            if(sensorType == DevID_BME280):
-            #if(1):
-                    humidity = bmx280GetHumidity()
-                    print("Relative Humidity : %.2f %%" %humidity)
-            sleep(10)
-
     def loop(self):
         while(1):
-            self.read_data()
             #resp = self.write_to_dynamoDB(self.get_time_string(),str(self.read_temperature()),str(self.read_pressure()),str(self.read_humidity()))
             #print(resp)
             user_id = "000000001_Manuel_Belke"
