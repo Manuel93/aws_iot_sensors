@@ -32,7 +32,7 @@ class aws_publisher(object):
         self.myAWSIoTMQTTClient.connect()
 
     def send_room_sensor_data(self,user_id,datetime,temp,pressure,humidity):
-        message = {"user_id":user_id,"datetime":datetime,"temperature [\N{DEGREE SIGN}C]" : temp, "pressure [Pa]":pressure, "humidity [%]":humidity}
+        message = {"user_id":user_id,"datetime":datetime,"temperature" : temp, "pressure":pressure, "humidity":humidity}
         topic = "room/sensordata"
         self.myAWSIoTMQTTClient.publish(topic, json.dumps(message), 1) 
 
@@ -42,7 +42,7 @@ class aws_publisher(object):
         self.myAWSIoTMQTTClient.publish(topic, json.dumps(message), 1) 
 
     def send_sensor_data(self,user_id,datetime,temp,pressure,humidity,moisture):
-        message = {"user_id":user_id,"datetime":datetime,"temperature [\N{DEGREE SIGN}C]" : temp, "pressure [Pa]":pressure, "humidity [%]":humidity, "moisture":[{"plant_1":moisture}]}
+        message = {"user_id":user_id,"datetime":datetime,"temperature" : temp, "pressure":pressure, "humidity":humidity, "moisture":[{"plant_1":moisture}]}
         topic = "room/sensordata"
         try:
             self.myAWSIoTMQTTClient.publish(topic, json.dumps(message), 1) 
@@ -201,24 +201,35 @@ class sensordata(object):
         return dt_string
 
     def read_temperature(self):
-        temperature = self.sensor.read_temperature()
+        temperature = 0
+        for i in range(5):
+            temperature += self.sensor.read_temperature()
+        temperature /= 5
         print(temperature)
         return temperature
 
     def read_pressure(self):
-        pressure = self.sensor.read_pressure()
+        pressure = 0
+        for i in range(5):
+            pressure += self.sensor.read_pressure()
+        pressure /= 5
         print(pressure)
         return pressure
 
     def read_humidity(self):
-        humidity = self.sensor.read_humidity()
+        humidity = 0
+        for i in range(5):
+            humidity += self.sensor.read_humidity()
+        humidity /= 5
         print(humidity)
         return humidity
 
     def read_moisture(self,id):
         value = 0
         try:
-	        value = self.adc.read_adc(id, gain=self.GAIN)
+            for i in range(5):
+	            value += self.adc.read_adc(id, gain=self.GAIN)
+            value /= 5
         except OSError as err:
             print("OS Error: {0}".format(err))
 
