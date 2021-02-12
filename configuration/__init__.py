@@ -1,0 +1,1 @@
+from configuration.configuration import aws_configuration as aws_configuration

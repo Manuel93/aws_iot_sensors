@@ -1,0 +1,8 @@
+{
+    "endpoint": "a2peyl32kymk7i-ats.iot.eu-central-1.amazonaws.com",
+    "client_id": "RaspberryPi_plant_watering",
+    "path_to_cert": "/home/Manuel/Downloads/094c5e9dc2-certificate.pem.crt",
+    "path_to_key": "/home/Manuel/Downloads/094c5e9dc2-private.pem.key",
+    "path_to_root": "/home/Manuel/Downloads/root.pem"
+    
+}

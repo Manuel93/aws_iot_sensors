@@ -14,14 +14,22 @@ import Adafruit_BME280
 import boto3
 import csv
 
+import configuration
+
 class aws_publisher(object):
     def __init__(self):
+
+        aws_config_file = "/configuration/aws.json"
+        self.aws_config = configuration.aws_configuration(aws_config_file)
+
+        print(self.aws_config.get_endpoint())
+
         # Define ENDPOINT, CLIENT_ID, PATH_TO_CERT, PATH_TO_KEY, PATH_TO_ROOT, MESSAGE, TOPIC, and RANGE
-        ENDPOINT = "a2peyl32kymk7i-ats.iot.eu-central-1.amazonaws.com"
-        CLIENT_ID = "RaspberryPi_plant_watering"
-        PATH_TO_CERT = "/home/Manuel/Downloads/094c5e9dc2-certificate.pem.crt"
-        PATH_TO_KEY = "/home/Manuel/Downloads/094c5e9dc2-private.pem.key"
-        PATH_TO_ROOT = "/home/Manuel/Downloads/root.pem"
+        ENDPOINT = self.aws_config.get_endpoint()
+        CLIENT_ID = self.aws_config.get_client_id()
+        PATH_TO_CERT = self.aws_config.get_path_to_cert()
+        PATH_TO_KEY = self.aws_config.get_path_to_key()
+        PATH_TO_ROOT = self.aws_config.get_path_to_root()
         #MESSAGE = "Hello World"
         #TOPIC = "room/temperature"
         #RANGE = 5
